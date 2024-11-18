@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: services-ingress
+
+spec:
+    rules:
+        - http:
+              paths:
+                  - path: /kms
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: kms-service
+                            port:
+                                number: 8001
+                  - path: /encryption
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: encryption-service
+                            port:
+                                number: 8000

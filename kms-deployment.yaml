@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kms-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kms-service
+  template:
+    metadata:
+      labels:
+        app: kms-service
+    spec:
+      containers:
+        - name: kms-service
+          image: kms-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kms-service
+spec:
+  selector:
+    app: kms-service
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+  type: ClusterIP
