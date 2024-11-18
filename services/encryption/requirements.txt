@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+cryptography
+pycryptodome
+requests
+python-multipart
+minio
