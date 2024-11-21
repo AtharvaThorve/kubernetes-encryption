@@ -22,9 +22,7 @@ class KMSEncryptionUser(HttpUser):
             print(f"Generated key_id: {self.key_id}")
         else:
             print(f"Failed to generate key: {response.status_code} {response.text}")
-
-    @task(2)
-    def upload_and_encrypt_file(self):
+        
         """Upload and encrypt a file using the generated key."""
         if not self.key_id:
             print("No key_id available for encryption.")
@@ -41,36 +39,33 @@ class KMSEncryptionUser(HttpUser):
         else:
             print(f"Failed to upload file: {response.status_code} {response.text}")
 
-    @task(3)
-    def download_and_decrypt_file(self):
         """Download and decrypt a file."""
         if not self.key_id:
             print("No key_id available for decryption.")
             return
         
-        files_response = self.client.get("/encryption/files/")
-        if files_response.status_code == 200 and files_response.json().get("files"):
-            files = files_response.json().get("files")
-            file_to_download = random.choice(files)
-            key_id = self.key_id_map.get(file_to_download)
+        key_id = self.key_id_map.get(file_name)
 
-            if key_id:
-                response = self.client.get(f"/encryption/download/{file_to_download}", params={"key_id": key_id})
-                if response.status_code == 200:
-                    print(f"File {file_to_download} downloaded and decrypted successfully!")
-                else:
-                    print(f"Failed to download file: {response.status_code} {response.text}")
+        if key_id:
+            response = self.client.get(f"/encryption/download/{file_name}.enc", params={"key_id": key_id})
+            if response.status_code == 200:
+                print(f"File {file_name} downloaded and decrypted successfully!")
             else:
-                print(f"No key_id found for file {file_to_download}")
+                print(f"Failed to download file: {response.status_code} {response.text}")
         else:
-            print("No files available for decryption or failed to list files.")
+            print(f"No key_id found for file {file_name}")
+        
 
 
 class CustomLoadTestShape(LoadTestShape):
     """
     A custom load test shape to simulate different stages of load testing.
     """
-    stages = [ {"duration": 80, "users": 40, "spawn_rate": 0.5} ]
+    stages = [
+        {"duration": 60, "users": 10, "spawn_rate": 1},
+        {"duration": 120, "users": 40, "spawn_rate": 2},
+        {"duration": 180, "users": 100, "spawn_rate": 5},    
+    ]
 
     def tick(self):
         run_time = self.get_run_time()
